@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>映射 KSM</title>
+  <meta id="i18n_pagename" content="message">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="https://static.medishares.net/css/materialize.min.css">
+  <link rel="stylesheet" type="text/css"
+        href="https://static.medishares.net/css/common.css">
+  <script src="https://static.medishares.net/js/jquery-3.2.1.min.js"></script>
+  <script src="https://static.medishares.net/js/vue.min.js"></script>
+  <script src="https://static.medishares.net/js/common.js"></script>
+</head>
+<body>
+<div class="mds-group">
+  <link rel="stylesheet" type="text/css" href="https://static.medishares.net/css/market/iris.css">
+  <link rel="stylesheet" type="text/css" href="https://static.medishares.net/css/market/mapping.css">
+  <section class="iris" v-cloak>
+    <div class="top center-align map">
+      <!--    <h4 class="title"><span class="i18n" data-properties="map" data-ptype="text"></span><span>KSM</span></h4>-->
+    </div>
+    <div class="map-detail">
+      <!-- 已映射 -->
+      <div class="top">
+        <span>🎉</span>
+        <span class="i18n" data-properties="map_already" data-ptype="text"></span>
+      </div>
+      <!-- 映射信息 -->
+      <div class="bottom">
+        <div class="map-bottom" style="padding-bottom: 20px;">
+          <ul class="detail-list">
+            <li class="clearfix">
+              <div class="left">Txn Hash</div>
+              <p><?=$hash?></p>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+  <script type="text/javascript">
+    var pageData = {
+      mapping_amount: 0,
+      balance: 0,
+      address: '',
+      contractAddr: '0xb59f67a8bff5d8cd03f6ac17265c550ed8f33907',
+      walletName: '',
+      walletAddr: '',
+      detail: false,
+      mapInfo: {},
+      page: 0,
+      pageTrans: 0,
+    };
+    $(function () {
+      var vue = new Vue({
+        el: '.mds-group',
+        data: pageData,
+        created() {
+          cookieLang = getCookie('userLanguage') ? getCookie('userLanguage') : getNavLanguage();
+          setUserLanguage(cookieLang);
+        },
+        mounted() {
+          cookieLang = getCookie('userLanguage') ? getCookie('userLanguage') : getNavLanguage();
+          setUserLanguage(cookieLang);
+        },
+        methods: {}
+      });
+    });
+  </script>
+</div>
+<script src="https://static.medishares.net/js/jquery.i18n.properties.js"></script>
+<script src="https://static.medishares.net/js/language.js"></script>
+</body>
+</html>
+

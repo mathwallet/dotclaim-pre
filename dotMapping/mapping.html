@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>映射 KSM</title>
+  <meta id="i18n_pagename" content="message">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="https://static.medishares.net/css/materialize.min.css">
+  <link rel="stylesheet" type="text/css"
+        href="https://static.medishares.net/css/common.css">
+  <script src="https://static.medishares.net/js/jquery-3.2.1.min.js"></script>
+  <script src="https://static.medishares.net/js/vue.min.js"></script>
+  <script src="https://static.medishares.net/js/common.js"></script>
+</head>
+<body>
+<div class="mds-group">
+  <link rel="stylesheet" type="text/css" href="https://static.medishares.net/css/market/iris.css">
+  <link rel="stylesheet" type="text/css" href="https://static.medishares.net/css/market/mapping.css">
+  <section class="iris" v-cloak>
+    <div class="top center-align map">
+    </div>
+    <div class="iris-info">
+      <div class="card iris-form">
+        <!-- 映射账户 -->
+        <h4 class="i18n" data-properties="map_account" data-ptype="text"></h4>
+        <div class="form-group">
+          <input type="text" class="i18n" data-properties="polkadot_account_pl" data-ptype="placeholder"
+                 v-model="walletAddr">
+        </div>
+        <!-- 映射 -->
+        <a href="javascript:;" class="iris-btn i18n" data-properties="map" data-ptype="text" @click="dotClaim"></a>
+      </div>
+      <div class="mapping_guide">
+        <a href="http://blog.mathwallet.net/?p=2747">《DOT领取操作指南》</a>
+      </div>
+      <div class="mapping_guide">
+        <a target="_blank" href="https://github.com/mathwallet/dotclaim-pre" style="letter-spacing: 1px;">开源代码</a>
+      </div>
+    </div>
+  </section>
+  <script src="https://static.medishares.net/js/jsbn.js"></script>
+  <script src="https://static.medishares.net/js/jsbn2.js"></script>
+  <script src="https://static.medishares.net/js/base58.js"></script>
+  <script src="https://static.medishares.net/js/web3/lrn.js"></script>
+  <script type="text/javascript">
+    var pageData = {
+      mapping_amount: 0,
+      address: '',
+      walletAddr: '',
+      hexalphabet: '0123456789abcdefABCDEF',
+      claimAddr: '0xa2CBa0190290aF37b7e154AEdB06d16100Ff5907',
+    };
+    $(function () {
+      var vue = new Vue({
+        el: '.mds-group',
+        data: pageData,
+        created() {
+          cookieLang = getCookie('userLanguage') ? getCookie('userLanguage') : getNavLanguage();
+          setUserLanguage(cookieLang);
+        },
+        mounted() {
+          cookieLang = getCookie('userLanguage') ? getCookie('userLanguage') : getNavLanguage();
+          setUserLanguage(cookieLang);
+          this.getCurrentWallet();
+        },
+        methods: {
+          to_hex(s) {
+            var r = '';
+            for (var i = 0; i < s.length; i++) {
+              var v;
+              if (s[i] < 0)
+                s[i] += 256;
+              v = s[i].toString(16);
+              if (v.length == 1)
+                v = '0' + v;
+              r += v;
+            }
+            return r;
+          },
+          strip_invalid(alphabet, str) {
+            let r = '';
+            for (let i = 0; i < str.length; i++) {
+              if (alphabet.indexOf(str.charAt(i)) != -1)
+                r += str.charAt(i);
+            }
+            return r;
+          },
+          getWeb3Account() {
+            return new Promise(function (resolve, reject) {
+              var tries = 0;
+              var timer = setInterval(function () {
+                tries++;
+                if (window.web3 && window.web3.eth) {
+                  clearInterval(timer);
+                  resolve(window.web3);
+                }
+                if (tries > 10) {
+                  clearInterval(timer);
+                  reject();
+                }
+              }, 100);
+            });
+          },
+          getCurrentWallet() {
+            let _this = this;
+            this.getWeb3Account().then(web3 => {
+              let account = web3.eth.accounts;
+              if (!account) {
+                alert(jQuery.i18n.prop('no_eth'));
+                return false;
+              }
+              _this.address = account[0];
+            });
+          },
+          dotClaim() {
+            if (!this.walletAddr) {
+              alert(jQuery.i18n.prop('polkadot_account_pl'));
+              return false;
+            }
+            //处理地址
+            let strip = this.strip_invalid(base58.alphabet, this.walletAddr);
+            let plain = base58.decode(strip);
+            plain.shift();
+            plain.pop();
+            plain.pop();
+            let address = this.to_hex(plain);
+            let gasLimit = 300000;
+            let limit = '0x' + gasLimit.toString(16);
+            this.getWeb3Account().then(web3 => {
+              web3.eth.sendTransaction({
+                'gas': limit,
+                'gasPrice': 20 * Math.pow(10, 9),
+                'from': this.address,
+                'to': this.claimAddr.toLowerCase(), // 代币合约
+                'value': '0x0',
+                'data': '0x' + 'c8622c24' + '000000000000000000000000' + this.address.substr(2, this.address.length).toLowerCase() + address,
+              }, (err, hash) => {
+                if (hash) {
+                  // console.log(hash);
+                  // console.log(err);
+                  alert(jQuery.i18n.prop('submit_success'));
+                  window.location.href = '/eth/dotDetail?hash=' + hash;
+                } else {
+                  alert('Fail');
+                }
+              });
+            });
+          },
+        }
+      });
+    });
+  </script>
+</div>
+<script src="https://static.medishares.net/js/jquery.i18n.properties.js"></script>
+<script src="https://static.medishares.net/js/language.js"></script>
+</body>
+</html>
+
